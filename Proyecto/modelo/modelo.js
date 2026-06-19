@@ -64,10 +64,6 @@ class Librero{
 
 }
 
-class Bibliotecario extends Reservas extends Librero extends Usuario{
-
-}
-
 class Bibliotecario extends Usuario {
     constructor(nombre, email, edad, contraseña) {
         super(nombre, email, edad, contraseña); 
