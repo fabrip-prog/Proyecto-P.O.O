@@ -47,3 +47,46 @@ class Reservas{
     }
 }
 
+class Librero{
+    constructor(){
+        this.libros = [];
+    }
+
+    CrearLibro(titulo, autor){
+        const nuevoLibro = new Libro(titulo, autor);
+        this.libros.push(nuevoLibro);
+        return nuevoLibro;
+    }
+
+    BuscarLibro(titulo){
+        return this.libros.find(libro => libro.titulo === titulo);
+    }       
+
+}
+
+class Bibliotecario extends Reservas extends Librero extends Usuario{
+
+}
+
+class Bibliotecario extends Usuario {
+    constructor(nombre, email, edad, contraseña) {
+        super(nombre, email, edad, contraseña); 
+    
+        this.librero = new Librero();
+        this.gestionReservas = new Reservas();
+    }
+
+    crearLibro(nombre, autor) {
+        return this.librero.crearLibro(nombre, autor);
+    }
+
+    reservar(usuario, libro, fecha) {
+        return this.gestionReservas.reservar(usuario, libro, fecha);
+    }
+
+    devolver(libro) {
+        this.gestionReservas.devolver(libro);
+    }
+}
+
+
