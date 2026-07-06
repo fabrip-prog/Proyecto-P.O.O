@@ -1,5 +1,19 @@
+import Libros from "../APIS/librosApi.js";
+
 const controladorReservas = {
     reservas: [],
+     
+
+    cargarLibros() {
+        const libros = await Libros();
+        const librero = new Librero();
+
+            libros.forEach(libro => {
+                const carga = librero.CrearLibro(libro.title, libro.authors.map(a => a.name).join(', '));
+            });
+
+        
+    },
 
     agregarReserva(){
         const nuevaReserva = new Reserva(
