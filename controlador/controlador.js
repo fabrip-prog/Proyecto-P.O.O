@@ -1,4 +1,14 @@
+<<<<<<< HEAD
 import Libros from "../APIS/librosApi.js";
+=======
+import { Usuario } from '../modelo/modelo.js';
+import { Libro } from '../modelo/modelo.js';
+import { Reserva } from '../modelo/modelo.js';
+import { guardarReservasEnStorage, recuperarReservasdeStorage } from './guardarStorage.js';
+
+const usuario1 = new Usuario('Juan', 'juan@example.com', 30, 'contraseña123');
+const libro1 = new Libro('El Quijote', 'Miguel de Cervantes');
+>>>>>>> d3eea3cad028bfc90b1bbeccfeb62f6f96de93ba
 
 const controladorReservas = {
     reservas: [],
@@ -17,50 +27,54 @@ const controladorReservas = {
 
     agregarReserva(){
         const nuevaReserva = new Reserva(
-            document.getElementById('usuario').value,
-            document.getElementById('libro').value
+            usuario1, libro1
         );
         this.reservas.push(nuevaReserva);
-        vistaMostrarReservas.renderizar(this.reservas);
-        this.guardarReservasEnStorage();
+        if (typeof vistaMostrarReservas !== 'undefined') {
+            vistaMostrarReservas.renderizar(this.reservas);
+        }
+        guardarReservasEnStorage(this.reservas);
     },
 
     completar(id){
         const reserva = this.reservas.find(r => r.id === id);
         if (reserva) reserva.completada = !reserva.completada;
-        vistaMostrarReservas.renderizar(this.reservas);
-        this.guardarReservasEnStorage();
+        if (typeof vistaMostrarReservas !== 'undefined') {
+            vistaMostrarReservas.renderizar(this.reservas);
+        }
+        guardarReservasEnStorage(this.reservas);
     },
 
     eliminar(id){
         this.reservas = this.reservas.filter(r => r.id !== id);
-        vistaMostrarReservas.renderizar(this.reservas);
+        if (typeof vistaMostrarReservas !== 'undefined') {
+            vistaMostrarReservas.renderizar(this.reservas);
+        }
+        guardarReservasEnStorage(this.reservas);
     },
 
     guardarReservasEnStorage(){
-        localStorage.setItem('reservaciones', JSON.stringify(this.reservas));
+        guardarReservasEnStorage(this.reservas);
     },
-
-    cargarReservasDesdeStorage(){
-        const reservasGuardadas = localStorage.getItem('reservaciones');
-        if (reservasGuardadas) {
-            this.reservas = this.recuperarReservasdeStorage(reservasGuardadas);
-        }
-        vistaMostrarReservas.renderizar(this.reservas);
-
-        this.reservas.forEach(reserva => {
-            console.log(reserva instanceof Reserva);
-        });
-    },
-
-    recuperarReservasdeStorage(reservasGuardadas){
+    
+    recuperarReservasdeStorage(){
         try {
-            return JSON.parse(reservasGuardadas);
+            const reservasGuardadas = recuperarReservasdeStorage();
+            if (reservasGuardadas && reservasGuardadas.length > 0) {
+                this.reservas = reservasGuardadas;
+                if (typeof vistaMostrarReservas !== 'undefined') {
+                    vistaMostrarReservas.renderizar(this.reservas);
+                }
+            }
         } catch (error) {
             console.error('Error al recuperar reservas:', error);
             return [];
-        }
+        }  
     }
+
 };
 
-controladorReservas.cargarReservasDesdeStorage();
+// Recuperar reservas al iniciar la aplicación
+controladorReservas.recuperarReservasdeStorage();
+
+export default controladorReservas;

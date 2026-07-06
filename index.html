@@ -1,14 +1,33 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title> 
+    <title>Prueba de Reservas</title>
 </head>
 <body>
+    <h1>Prueba de Reservas con localStorage</h1>
     
-</body>
+    <button onclick="agregarReserva()">➕ Agregar Reserva</button>
+    <button onclick="verificarReservasGuardadas()">🔍 Ver Reservas</button>
+    <button onclick="limpiarReservas()">🗑️ Limpiar</button>
+    
+    <div id="resultado"></div>
 
+<<<<<<< HEAD
 <!-- <script type="module" src="./controlador/controlador.js"></script> -->
  <script type="module" src="./controlador/controlador.js"></script>
+=======
+    <script type="module">
+        import controladorReservas from './controlador/controlador.js';
+        import { verificarReservasGuardadas, limpiarReservas } from './controlador/guardarStorage.js';
+        
+        window.agregarReserva = () => {
+            controladorReservas.agregarReserva();
+            console.log('Reserva agregada');
+        };
+        
+        window.verificarReservasGuardadas = verificarReservasGuardadas;
+        window.limpiarReservas = limpiarReservas;
+    </script>
+</body>
+>>>>>>> d3eea3cad028bfc90b1bbeccfeb62f6f96de93ba
 </html>

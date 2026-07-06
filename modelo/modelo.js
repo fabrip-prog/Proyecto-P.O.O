@@ -1,4 +1,4 @@
-class Usuario{
+export class Usuario{
     #contraseña;
     constructor(nombre, email, contraseña, edad){
         this.id = Math.random().toString(36).substr(2, 9);
@@ -11,7 +11,7 @@ class Usuario{
 
 }
 
-class Libro{
+ export class Libro{
     constructor(titulo, autor){
         this.id = Math.random().toString(36).substr(2, 9);
         this.titulo = titulo;
@@ -23,11 +23,13 @@ class Libro{
     }
 }   
 
-class Reserva{
+export class Reserva{
     constructor(usuario, libro){
+        this.id = Math.random().toString(36).substr(2, 9);
         this.usuario = usuario;
         this.libro = libro;
         this.fechaReserva = new Date();
+        this.completada = false;
     }
 }
 
