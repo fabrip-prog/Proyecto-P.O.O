@@ -1,80 +1,108 @@
-<<<<<<< HEAD
 import Libros from "../APIS/librosApi.js";
-=======
-import { Usuario } from '../modelo/modelo.js';
-import { Libro } from '../modelo/modelo.js';
-import { Reserva } from '../modelo/modelo.js';
-import { guardarReservasEnStorage, recuperarReservasdeStorage } from './guardarStorage.js';
-
-const usuario1 = new Usuario('Juan', 'juan@example.com', 30, 'contraseña123');
-const libro1 = new Libro('El Quijote', 'Miguel de Cervantes');
->>>>>>> d3eea3cad028bfc90b1bbeccfeb62f6f96de93ba
+import { Usuario, Libro, Reserva } from '../modelo/modelo.js';
+import { guardarReservasEnStorage as guardarEnStorage, recuperarReservasdeStorage as recuperarDeStorage, limpiarReservas as limpiarStorage } from './guardarStorage.js';
 
 const controladorReservas = {
     reservas: [],
-     
 
-    cargarLibros() {
-        const libros = await Libros();
-        const librero = new Librero();
-
-            libros.forEach(libro => {
-                const carga = librero.CrearLibro(libro.title, libro.authors.map(a => a.name).join(', '));
-            });
-
-        
-    },
-
-    agregarReserva(){
-        const nuevaReserva = new Reserva(
-            usuario1, libro1
-        );
-        this.reservas.push(nuevaReserva);
-        if (typeof vistaMostrarReservas !== 'undefined') {
-            vistaMostrarReservas.renderizar(this.reservas);
+    async cargarLibros() {
+        try {
+            const libros = await Libros();
+            return Array.isArray(libros) ? libros : [];
+        } catch (error) {
+            console.error('Error al cargar libros:', error);
+            return [];
         }
-        guardarReservasEnStorage(this.reservas);
     },
 
-    completar(id){
+    async cargarLibrosDisponibles() {
+        return this.cargarLibros();
+    },
+
+    agregarReserva(usuario, libro) {
+        const nuevaReserva = new Reserva(usuario, libro);
+        this.reservas.push(nuevaReserva);
+        this.guardarReservasEnStorage();
+        this.actualizarVista();
+        return nuevaReserva;
+    },
+
+    crearReservaDesdeDatos(datos) {
+        const nombre = datos?.nombre?.trim() || '';
+        const email = datos?.email?.trim() || '';
+        const edad = Number(datos?.edad) || 18;
+        const titulo = datos?.titulo?.trim() || '';
+        const autor = datos?.autor?.trim() || '';
+
+        if (!nombre || !email || !titulo || !autor) {
+            return { ok: false, message: 'Completa los campos obligatorios.' };
+        }
+
+        const usuario = new Usuario(nombre, email, 'temporal', edad);
+        const libro = new Libro(titulo, autor);
+        const reserva = this.agregarReserva(usuario, libro);
+
+        return {
+            ok: true,
+            reserva,
+            message: `Reserva creada para "${libro.titulo}".`
+        };
+    },
+
+    completar(id) {
         const reserva = this.reservas.find(r => r.id === id);
         if (reserva) reserva.completada = !reserva.completada;
-        if (typeof vistaMostrarReservas !== 'undefined') {
-            vistaMostrarReservas.renderizar(this.reservas);
-        }
-        guardarReservasEnStorage(this.reservas);
+        this.guardarReservasEnStorage();
+        this.actualizarVista();
+        return reserva;
     },
 
-    eliminar(id){
+    eliminar(id) {
         this.reservas = this.reservas.filter(r => r.id !== id);
-        if (typeof vistaMostrarReservas !== 'undefined') {
-            vistaMostrarReservas.renderizar(this.reservas);
-        }
-        guardarReservasEnStorage(this.reservas);
+        this.guardarReservasEnStorage();
+        this.actualizarVista();
+        return this.reservas;
     },
 
-    guardarReservasEnStorage(){
-        guardarReservasEnStorage(this.reservas);
+    guardarReservasEnStorage() {
+        guardarEnStorage(this.reservas);
     },
-    
-    recuperarReservasdeStorage(){
+
+    recuperarReservasdeStorage() {
         try {
-            const reservasGuardadas = recuperarReservasdeStorage();
-            if (reservasGuardadas && reservasGuardadas.length > 0) {
+            const reservasGuardadas = recuperarDeStorage();
+            if (Array.isArray(reservasGuardadas)) {
                 this.reservas = reservasGuardadas;
-                if (typeof vistaMostrarReservas !== 'undefined') {
-                    vistaMostrarReservas.renderizar(this.reservas);
-                }
+                this.actualizarVista();
             }
+            return this.reservas;
         } catch (error) {
             console.error('Error al recuperar reservas:', error);
             return [];
-        }  
-    }
+        }
+    },
 
+    verReservasGuardadas() {
+        const reservas = recuperarDeStorage();
+        this.reservas = Array.isArray(reservas) ? reservas : [];
+        this.actualizarVista();
+        return this.reservas;
+    },
+
+    limpiarReservas() {
+        limpiarStorage();
+        this.reservas = [];
+        this.actualizarVista();
+        return true;
+    },
+
+    actualizarVista() {
+        if (typeof window !== 'undefined' && typeof window.vistaMostrarReservas !== 'undefined') {
+            window.vistaMostrarReservas.renderizar(this.reservas);
+        }
+    }
 };
 
-// Recuperar reservas al iniciar la aplicación
 controladorReservas.recuperarReservasdeStorage();
 
 export default controladorReservas;

@@ -1,33 +1,313 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Prueba de Reservas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Biblioteca</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #223;
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        .panel {
+            margin-top: 20px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fafcff;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        button {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            background: #2563eb;
+        }
+
+        button.secondary {
+            background: #64748b;
+        }
+
+        button.danger {
+            background: #dc2626;
+        }
+
+        .mensaje {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .mensaje.success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .mensaje.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .reserva {
+            padding: 12px;
+            border-left: 4px solid #2563eb;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .empty {
+            color: #64748b;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-    <h1>Prueba de Reservas con localStorage</h1>
-    
-    <button onclick="agregarReserva()">➕ Agregar Reserva</button>
-    <button onclick="verificarReservasGuardadas()">🔍 Ver Reservas</button>
-    <button onclick="limpiarReservas()">🗑️ Limpiar</button>
-    
-    <div id="resultado"></div>
+    <main class="container">
+        <h1>Biblioteca - Sistema de reservas</h1>
+        <p>Registra reservas de libros.</p>
 
-<<<<<<< HEAD
-<!-- <script type="module" src="./controlador/controlador.js"></script> -->
- <script type="module" src="./controlador/controlador.js"></script>
-=======
+        <section class="panel">
+            <h2>Nueva reserva</h2>
+            <form id="formReserva">
+                <div class="grid">
+                    <div>
+                        <label for="nombre">Nombre del usuario</label>
+                        <input id="nombre" name="nombre" type="text" placeholder="Ej. Ana López" required>
+                    </div>
+                    <div>
+                        <label for="email">Correo</label>
+                        <input id="email" name="email" type="email" placeholder="Ej. ana@mail.com" required>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div>
+                        <label for="edad">Edad</label>
+                        <input id="edad" name="edad" type="number" min="10" placeholder="Ej. 22" required>
+                    </div>
+                    <div>
+                        <label for="titulo">Título del libro</label>
+                        <input id="titulo" name="titulo" type="text" placeholder="Ej. El Quijote" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="libroSugerido">Libro sugerido</label>
+                    <select id="libroSugerido" name="libroSugerido">
+                        <option value="">Selecciona un libro desde la API</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="autor">Autor</label>
+                    <input id="autor" name="autor" type="text" placeholder="Ej. Miguel de Cervantes" required>
+                </div>
+            </form>
+
+            <div class="actions">
+                <button id="btnReservar" type="button">Reservar libro</button>
+                <button id="btnCargarLibros" class="secondary" type="button">Cargar libros</button>
+                <button id="btnVerReservas" class="secondary" type="button">Ver reservas</button>
+                <button id="btnLimpiar" class="danger" type="button">Limpiar</button>
+            </div>
+
+            <div id="mensaje" class="mensaje"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Reservas actuales</h2>
+            <div id="resultado"></div>
+        </section>
+    </main>
+
     <script type="module">
         import controladorReservas from './controlador/controlador.js';
-        import { verificarReservasGuardadas, limpiarReservas } from './controlador/guardarStorage.js';
-        
-        window.agregarReserva = () => {
-            controladorReservas.agregarReserva();
-            console.log('Reserva agregada');
+
+        const form = document.getElementById('formReserva');
+        const resultado = document.getElementById('resultado');
+        const mensaje = document.getElementById('mensaje');
+        const selectLibro = document.getElementById('libroSugerido');
+
+        window.vistaMostrarReservas = {
+            renderizar(reservas) {
+                if (!resultado) return;
+
+                if (!reservas || reservas.length === 0) {
+                    resultado.innerHTML = '<p class="empty">No hay reservas registradas todavía.</p>';
+                    return;
+                }
+
+                resultado.innerHTML = reservas.map((reserva, index) => `
+                    <article class="reserva">
+                        <strong>${index + 1}. ${reserva.libro?.titulo || 'Sin título'}</strong>
+                        <p>Autor: ${reserva.libro?.autor || 'Sin autor'}</p>
+                        <p>Usuario: ${reserva.usuario?.nombre || 'Sin nombre'}</p>
+                        <p>Correo: ${reserva.usuario?.email || 'Sin correo'}</p>
+                        <p>Estado: ${reserva.completada ? 'Completada' : 'Pendiente'}</p>
+                        <div class="actions">
+                            <button data-action="toggle" data-id="${reserva.id}" type="button">${reserva.completada ? 'Marcar pendiente' : 'Marcar completada'}</button>
+                            <button data-action="delete" data-id="${reserva.id}" class="danger" type="button">Eliminar</button>
+                        </div>
+                    </article>
+                `).join('');
+            }
         };
-        
-        window.verificarReservasGuardadas = verificarReservasGuardadas;
-        window.limpiarReservas = limpiarReservas;
+
+        function mostrarMensaje(texto, tipo = 'success') {
+            if (!mensaje) return;
+            mensaje.textContent = texto;
+            mensaje.className = `mensaje ${tipo}`;
+        }
+
+        function reservarDesdeFormulario() {
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                edad: document.getElementById('edad').value,
+                titulo: document.getElementById('titulo').value,
+                autor: document.getElementById('autor').value
+            };
+
+            const resultado = controladorReservas.crearReservaDesdeDatos(datos);
+
+            if (!resultado.ok) {
+                mostrarMensaje(resultado.message, 'error');
+                return;
+            }
+
+            mostrarMensaje(resultado.message, 'success');
+            form.reset();
+            if (selectLibro) {
+                selectLibro.value = '';
+            }
+        }
+
+        window.agregarReserva = reservarDesdeFormulario;
+
+        function manejarAcciones(event) {
+            const boton = event.target.closest('button[data-action]');
+            if (!boton) return;
+
+            const id = boton.dataset.id;
+            const accion = boton.dataset.action;
+
+            if (accion === 'toggle') {
+                controladorReservas.completar(id);
+                mostrarMensaje('Estado actualizado.', 'success');
+            }
+
+            if (accion === 'delete') {
+                controladorReservas.eliminar(id);
+                mostrarMensaje('Reserva eliminada.', 'success');
+            }
+        }
+
+        resultado.addEventListener('click', manejarAcciones);
+
+        window.verificarReservasGuardadas = () => {
+            const reservas = controladorReservas.verReservasGuardadas();
+            if (reservas.length > 0) {
+                mostrarMensaje(`Se encontraron ${reservas.length} reservas guardadas.`, 'success');
+            } else {
+                mostrarMensaje('No hay reservas guardadas.', 'error');
+            }
+            return reservas;
+        };
+
+        window.limpiarReservas = () => {
+            controladorReservas.limpiarReservas();
+            mostrarMensaje('Reservas eliminadas.', 'success');
+        };
+
+        async function cargarLibrosDisponibles() {
+            const libros = await controladorReservas.cargarLibrosDisponibles();
+            if (!selectLibro) return;
+
+            selectLibro.innerHTML = '<option value="">Selecciona un libro desde la API</option>' +
+                libros.map(libro => {
+                    const autores = (libro.authors || [{ name: 'Autor desconocido' }]).map(a => a.name).join(', ');
+                    return `<option value="${libro.id}" data-title="${libro.title}" data-author="${autores}">${libro.title}</option>`;
+                }).join('');
+
+            if (libros.length > 0) {
+                mostrarMensaje(`Se cargaron ${libros.length} libros disponibles.`, 'success');
+            } else {
+                mostrarMensaje('No se pudieron cargar libros desde la API.', 'error');
+            }
+        }
+
+        if (selectLibro) {
+            selectLibro.addEventListener('change', (event) => {
+                const opcion = event.target.selectedOptions[0];
+                if (!opcion || !opcion.value) return;
+                document.getElementById('titulo').value = opcion.dataset.title || '';
+                document.getElementById('autor').value = opcion.dataset.author || '';
+            });
+        }
+
+        document.getElementById('btnReservar').addEventListener('click', reservarDesdeFormulario);
+        document.getElementById('btnCargarLibros').addEventListener('click', cargarLibrosDisponibles);
+        document.getElementById('btnVerReservas').addEventListener('click', window.verificarReservasGuardadas);
+        document.getElementById('btnLimpiar').addEventListener('click', window.limpiarReservas);
+
+        controladorReservas.recuperarReservasdeStorage();
+        window.vistaMostrarReservas.renderizar(controladorReservas.reservas);
     </script>
 </body>
->>>>>>> d3eea3cad028bfc90b1bbeccfeb62f6f96de93ba
 </html>
