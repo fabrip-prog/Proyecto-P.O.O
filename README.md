@@ -136,10 +136,6 @@ Los diagramas sirven como una guía visual del diseño del sistema, mientras que
 2. Abrir el archivo index.html en un navegador.
 3. O, si se prefiere, utilizar una extensión de servidor local como Live Server para una mejor experiencia.
 
-## Notas adicionales
-
-Este proyecto fue desarrollado con fines educativos y para practicar conceptos de programación orientada a objetos, modularización de código y conexión con APIs externas.
-
 ## Posibles mejoras futuras
 
 - Agregar autenticación de usuarios.
